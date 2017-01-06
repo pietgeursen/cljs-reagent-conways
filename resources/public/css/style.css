@@ -2,4 +2,7 @@
 .row {
   display: flex;
 }
+.cell {
+  flex-grow: 1;
+}
 
