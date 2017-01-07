@@ -9,6 +9,7 @@
   :dependencies [[org.clojure/clojure "1.8.0"]
                  [org.clojure/clojurescript "1.9.229"]
                  [reagent "0.6.0"]
+                 [cljsjs/virtual-dom "2.1.1-0"]
                  [org.clojure/core.async "0.2.391"
                   :exclusions [org.clojure/tools.reader]]]
 

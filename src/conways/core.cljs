@@ -1,8 +1,13 @@
 (ns conways.core
   (:require 
-    [reagent.core :as r]
+    [cljsjs.virtual-dom]
     [conways.lib :refer [randomBoard createBoard nextBoard]]
     ))
+
+(def h js/virtualDom.h)
+(def create js/virtualDom.create)
+(def diff js/virtualDom.diff)
+(def patch js/virtualDom.patch)
 
 (enable-console-print!)
 
@@ -16,23 +21,31 @@
 )
     
 (defn cellComponent [idx cell] 
-  [:div {:class "cell" :key idx } (if cell "X" "_")])
+  (h "div" (js-obj "className" "cell") (if cell "X" "_")))
 
 (defn rowComponent [idx row] 
-  [:div {:class "row" :key idx} 
-     (map-indexed (fn [idx board] ^{:key idx} [cellComponent idx board]) row)
-   ])
+  (h "div" (js-obj "className" "row") 
+     (clj->js (map-indexed (fn [idx cell] ^{:key idx} (cellComponent idx cell)) row))
+   ))
 
 (defn boardComponent [board] 
-  [:div {:class "board"} 
-   (map-indexed (fn [idx board] ^{:key idx} [rowComponent idx board]) @board)
- 
-   ])
+  (h "div" (js-obj "className" "board") 
+     (clj->js (map-indexed (fn [idx board] ^{:key idx} (rowComponent idx board)) board))
+   ))
 
-(defonce board (r/atom (randomBoard (createBoard 50))))
+(defonce board (atom (randomBoard (createBoard 50))))
+(defonce tree (atom (boardComponent @board)))
+(defonce rootNode (atom (create @tree)))
 
-(r/render [boardComponent board]
-            (js/document.getElementById "app"))
 
-(js/setInterval 
-  (fn [] (swap! board #(nextBoard @board))) 1000)
+(js/document.body.appendChild @rootNode)
+
+(defn tick [] 
+  (swap! board #(nextBoard @board))
+  (def newTree (boardComponent @board))
+  (def patches (diff @tree newTree))
+  (swap! rootNode #(patch @rootNode patches))
+  (swap! tree (fn [] newTree))
+  )
+
+(js/setInterval tick 1000)
