@@ -25,12 +25,12 @@
 
 (defn rowComponent [idx row] 
   (h "div" (js-obj "className" "row") 
-     (clj->js (map-indexed (fn [idx cell] ^{:key idx} (cellComponent idx cell)) row))
+     (clj->js (map (fn [cell] (cellComponent idx cell)) row))
    ))
 
 (defn boardComponent [board] 
   (h "div" (js-obj "className" "board") 
-     (clj->js (map-indexed (fn [idx board] ^{:key idx} (rowComponent idx board)) board))
+     (clj->js (map (fn [row] (rowComponent idx row)) board))
    ))
 
 (defonce board (atom (randomBoard (createBoard 50))))
